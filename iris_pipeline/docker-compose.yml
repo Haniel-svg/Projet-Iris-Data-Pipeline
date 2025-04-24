@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: iris_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - iris_network
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.16.2
+    command: mlflow server --host 0.0.0.0 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow/artifacts
+      - ./mlflow.db:/mlflow/mlflow.db
+    networks:
+      - iris_network
+
+  preprocessing:
+    build:
+      context: .
+      dockerfile: Dockerfile.preprocess
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - postgres
+    networks:
+      - iris_network
+
+  training:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    depends_on:
+      - postgres
+      - mlflow
+    networks:
+      - iris_network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mlflow
+    networks:
+      - iris_network
+
+networks:
+  iris_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mlflow_data:
