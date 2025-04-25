@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    container_name: iris-db
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+  preprocess:
+    build: ./preprocess
+    depends_on:
+      - db
+    env_file: .env
+
+  model:
+    build: ./model
+    depends_on:
+      - db
+    env_file: .env
+    ports:
+      - "5000:5000"
+
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - model
+    env_file: .env
+
+volumes:
+  pgdata:
