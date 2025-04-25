@@ -8,7 +8,7 @@ Ce projet met en place un pipeline Machine Learning complet et **dockerisé** po
 
 - 📦 Pipeline ML entièrement conteneurisé avec Docker
 - 🧮 Prétraitement et stockage des données dans PostgreSQL
-- 🤖 Entraînement d’un modèle de régression linéaire avec MLflow
+- 🤖 Entraînement d’un modèle de régression linéaire/random forrest regressor avec MLflow
 - 📈 Tracking des expérimentations
 - 🌐 API FastAPI pour la prédiction en temps réel
 
